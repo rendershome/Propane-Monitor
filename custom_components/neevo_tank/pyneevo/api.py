@@ -30,7 +30,7 @@ def _number_or_none(value: Any) -> Optional[float]:
     return float(value)
 
 
-HOST ="ws.otodatanetwork.com"
+HOST = "ws.otodatanetwork.com"
 REST_URL = f"https://{HOST}/neevoapp/v1/DataService.svc/"
 HEADERS = {
     "Content-Type": "application/json",

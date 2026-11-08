@@ -186,8 +186,8 @@ class NeeVoCoordinator(DataUpdateCoordinator[dict[str, TankData]]):
             _LOGGER.warning("Could not update Nee-Vo tanks: %s", reason)
 
         if now - self.first_failure >= FAILURE_GRACE:
-            # Forum users have seen rejected passwords reported as HTTP 502, so
-            # this asks the user to check, rather than assuming a bad password.
+            # A rejected password can look like a server error, so this asks the
+            # user to check, rather than assuming a bad password.
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,

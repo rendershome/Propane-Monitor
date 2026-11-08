@@ -2,15 +2,17 @@
 
 An unofficial Home Assistant integration for Nee-Vo propane tank monitors, and the asynchronous Python library behind it.
 
-This project is built on [PyNeeVo](https://github.com/davidflypei/pyneevo) by [davidflypei](https://github.com/davidflypei), which is the original source of the library. See [Credits](#credits).
+Built on [PyNeeVo](https://github.com/davidflypei/pyneevo) by [davidflypei](https://github.com/davidflypei). See [Credits](#credits).
 
-This project is not affiliated with or supported by Otodata. It uses an undocumented service that can change without notice. Your use of that service is subject to your Nee-Vo End User License Agreement, so check it applies to how you use this.
+This project is not affiliated with or supported by Otodata. It uses an undocumented service that can change without notice. Your use of that service is subject to your Nee-Vo End User License Agreement, so check that it allows how you use this.
 
 ## Home Assistant Integration
 
 The **Nee-Vo Tank Monitor** integration adds each tank on your account as a device. It only reads data, and it checks for updates every 6 hours.
 
 ### Installing
+
+Requires Home Assistant 2026.10 or newer.
 
 With [HACS](https://hacs.xyz):
 
@@ -21,9 +23,7 @@ With [HACS](https://hacs.xyz):
 
 Or manually, copy `custom_components/neevo_tank` into your Home Assistant `config/custom_components` folder and restart.
 
-Then go to **Settings > Devices & Services > Add Integration**, search for **Nee-Vo Tank Monitor**, and enter the email and password you use in the Nee-Vo app. They are stored in Home Assistant's configuration, like other integrations' credentials.
-
-Requires Home Assistant 2026.10 or newer.
+Then go to **Settings > Devices & Services > Add Integration**, search for **Nee-Vo Tank Monitor**, and enter the email and password you use in the Nee-Vo app. Home Assistant stores them in its configuration, as it does for other integrations.
 
 ### Entities
 
@@ -42,43 +42,29 @@ Requires Home Assistant 2026.10 or newer.
 
 ### Good to Know
 
-- **Consumption is an estimate.** It comes from level changes, ignoring falls under 0.5% until they add up and treating a rise of 5% or more as a refill. Those thresholds came from one tank, and a real refill has not been tested yet.
-- **Energy dashboard:** add **Propane consumed** as a gas source. Home Assistant measures it in liters of liquid propane, so a price per gallon needs dividing by 3.785.
+- **Consumption is an estimate.** It comes from level changes, ignoring falls under 0.5% until they add up and treating a rise of 5% or more as a refill. Refill detection has not yet been confirmed against a real refill.
+- **Energy dashboard:** add **Propane consumed** as a gas source. It is measured in liters of liquid propane, so divide a price per gallon by 3.785.
 - **Outages:** sensors keep their last values for up to 24 hours. After that they become unavailable and a repair notice appears. Use **Last reading** or **Reading overdue** to spot a monitor that has stopped reporting.
 - **Not a safety device.** Don't rely on this to prevent running out of propane, or in place of normal inspections.
 - **Diagnostics** remove your email, password, serial number, tank name, location and supplier, but check them before sharing.
 
 ### Removing
 
-Delete the integration under **Settings > Devices & Services**, then delete the `custom_components/neevo_tank` folder and restart. Deleting it also removes its saved consumption total.
+Delete the integration under **Settings > Devices & Services**, then remove it from HACS or delete the `custom_components/neevo_tank` folder, and restart. This also deletes its saved consumption total.
 
-### Development
+## Python Library
 
-The integration tests need Linux, because Home Assistant doesn't run natively on Windows:
+The `pyneevo` library in this repository only reads data. It has no methods for operations that change an account, a tank or a fill request.
 
-```bash
-pip install pytest-homeassistant-custom-component
-python -m pytest tests_ha tests
-```
+### Installing the Library
 
-HACS only installs the integration folder, so `src/pyneevo` is copied to `custom_components/neevo_tank/pyneevo`. Copy it again after any library change. A test fails if the two differ.
-
-## Features
-
-* Asynchronous API built with `aiohttp`
-* Username and password authentication
-* Retrieve all available tank information
-* Refresh tank data from the Nee-Vo platform
-* Specific errors for bad credentials, connection problems, timeouts and unexpected responses
-* Optional shared `aiohttp` session and configurable timeout
-
-## Installation
+This version differs from the `pyneevo` package on PyPI, so install it from this repository:
 
 ```bash
-pip install pyneevo
+pip install git+https://github.com/rendershome/Propane-Monitor
 ```
 
-## Quick Start
+### Quick Start
 
 ```python
 import asyncio
@@ -112,34 +98,11 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## Refreshing Tank Data
-
-Refreshing individual devices is not yet implemented. As a result, refreshing data updates all devices associated with the account.
-
-`refresh_tanks()` downloads the list again from the Nee-Vo servers. It does not ask the monitor to take a new reading, so a tank's values only change after the monitor has reported in.
-
-```python
-await api.refresh_tanks()
-
-tanks = await api.get_tanks_info()
-
-for tank in tanks.values():
-    print(
-        f"ID: {tank.id} "
-        f"Name: {tank.name} "
-        f"Level: {tank.level}%"
-    )
-```
-
-## Available Methods
-
-### Authentication
+### Signing In
 
 ```python
 api = await NeeVoApiInterface.login(email, password)
 ```
-
-Checks the credentials with the Nee-Vo platform and returns an API interface instance.
 
 Two optional arguments are available:
 
@@ -152,23 +115,32 @@ api = await NeeVoApiInterface.login(
 )
 ```
 
-### Get Tank Information
+`api.must_change_password` holds the value returned at login, or `None` if the API did not send one.
+
+### Tanks
 
 ```python
 tanks = await api.get_tanks_info()
 ```
 
-Returns a dictionary of all tanks associated with the account, keyed by tank ID. Tanks are downloaded on the first call and the same data is returned afterwards until `refresh_tanks()` is called.
-
-### Refresh Tank Data
+Returns a dictionary of the account's tanks, keyed by tank ID. Tanks are downloaded on the first call, and the same data is returned until you refresh it:
 
 ```python
 await api.refresh_tanks()
 ```
 
-Downloads the current tank list and replaces the data held by the library. New tanks are added and removed tanks are dropped. If the request fails, the existing data is kept.
+This downloads the current list from the Nee-Vo servers, adding new tanks and dropping removed ones. If the request fails, the existing data is kept. It does not ask the monitor for a new reading, so values only change after the monitor has reported in.
 
-### Get Level History
+### Tank Properties
+
+Every property except `id` and `data` returns `None` if the API did not send that field.
+
+- **Tank:** `id`, `name`, `product`, `level`, `serial_number`, `tank_capacity`, `tank_last_pressure`, `tank_last_pressure_unit`, `last_reading` (a UTC `datetime`) and `data` (the raw record).
+- **Supplier:** `company_id`, `dealer_id`, `company_image_id`, `company_name`, `company_support_phone_number`, `fill_request_available`.
+- **Alerts:** `notify_at_1`, `notify_at_2`, `notify_critical_levels`, `notify_dispatch`, `notify_dispatch_enabled`, `notify_fill_detection`.
+- **Other:** `is_owner`, `consumption_graph_enabled`, `sensor_min_level`, `sensor_max_level`, `tank_form_type`, `tank_primary_value_type`, `theme_info`, and `latitude` and `longitude`, which are private because they show where the tank is.
+
+### Level History
 
 ```python
 readings = await api.get_level_history(tank.id)
@@ -179,9 +151,7 @@ for reading in readings:
 
 Returns the tank's recorded history, oldest first. Each entry has a UTC `date`, a `level` in percent and a `consumption` value, and either of the last two can be `None`.
 
-The API does not document `consumption`. In testing with one tank it matched the level drop multiplied by the tank's capacity, which suggests liters, but most days had no value. To measure total usage, calculate it from `level` instead.
-
-The Nee-Vo API chooses the date range. Dates with nothing recorded are left out, so there can be gaps between readings.
+The API chooses the date range. Dates with nothing recorded are left out, so there can be gaps between readings. `consumption` is often empty and its meaning is undocumented, so calculate total usage from `level` instead.
 
 ### Other Read Operations
 
@@ -198,25 +168,9 @@ user = await api.get_user()
 authorizations = await api.get_tank_authorizations(tank.id)
 ```
 
-`api.must_change_password` holds the value returned at login, or `None` if the API did not send one.
+### Error Handling
 
-PyNeeVo only reads. It has no methods for operations that change an account, a tank or a fill request, and it does not call them.
-
-### Tank Properties
-
-`id`, `name`, `product`, `level`, `serial_number`, `tank_capacity`, `tank_last_pressure`, `tank_last_pressure_unit`, `last_reading` (a UTC `datetime`) and `data` (the raw record).
-
-Supplier: `company_id`, `dealer_id`, `company_image_id`, `company_name`, `company_support_phone_number`, `fill_request_available`.
-
-Alerts: `notify_at_1`, `notify_at_2`, `notify_critical_levels`, `notify_dispatch`, `notify_dispatch_enabled`, `notify_fill_detection`.
-
-Other: `is_owner`, `consumption_graph_enabled`, `sensor_min_level`, `sensor_max_level`, `tank_form_type`, `tank_primary_value_type`, `theme_info`, and `latitude` and `longitude`, which are private because they show where the tank is.
-
-Every property except `id` and `data` returns `None` if the API did not send that field.
-
-## Error Handling
-
-Every error raised by PyNeeVo is a `PyNeeVoError`.
+Every error raised by the library is a `PyNeeVoError`.
 
 ```python
 from pyneevo.errors import (
@@ -225,7 +179,6 @@ from pyneevo.errors import (
     InvalidResponseFormat,
     NeeVoConnectionError,
     NeeVoTimeoutError,
-    PyNeeVoError,
 )
 
 try:
@@ -244,41 +197,21 @@ except GenericHTTPError as err:
 
 `NeeVoTimeoutError` is a kind of `NeeVoConnectionError`, so catch it first if you handle them differently.
 
-## Current API Coverage
-
-PyNeeVo currently implements read operations only.
-
-Additional endpoints may be added in future releases.
-
-If there is a endpoint you need please create an issue. Pull Requests are also welcome.
-
-## Intended Audience
-
-PyNeeVo is intended for Python developers who want to integrate Nee-Vo tank data into:
-
-* Home automation platforms
-* Monitoring dashboards
-* Notification systems
-* Reporting tools
-* Custom integrations
-
 ## Development
 
-The tests use only the standard library plus `aiohttp`, and never touch the network:
+The tests never touch the network. They need Linux, because Home Assistant doesn't run natively on Windows:
 
 ```bash
-pip install -e .
-python -m unittest discover -s tests -t .
+pip install pytest-homeassistant-custom-component
+python -m pytest tests_ha tests
 ```
+
+HACS only installs the integration folder, so `src/pyneevo` is copied to `custom_components/neevo_tank/pyneevo`. Copy it again after any library change. A test fails if the two differ.
 
 ## Credits
 
-- **Original library:** [PyNeeVo](https://github.com/davidflypei/pyneevo), created by [davidflypei](https://github.com/davidflypei) and also published [on PyPI](https://pypi.org/project/pyneevo/). The library in this repository started as a copy of version 1.0.7 and has since been changed, so report problems with this version here rather than to that project.
-- **Library fix:** this history includes the error handling fix [jasonjhofmann](https://github.com/jasonjhofmann) contributed to PyNeeVo.
-- **Reference:** [propane-homeassistant](https://github.com/jasonjhofmann/propane-homeassistant), another Home Assistant integration for these monitors, was reviewed while designing this one.
-
-The original authors have not reviewed or endorsed this project.
+The library is based on [PyNeeVo](https://github.com/davidflypei/pyneevo) by [davidflypei](https://github.com/davidflypei). This version has been changed, so please report problems with it here rather than to that project. The original author has not reviewed or endorsed this project.
 
 ## License
 
-This project is licensed under the MIT License. The original PyNeeVo copyright and license are kept in [LICENSE](LICENSE), and a copy is included with the bundled library at `custom_components/neevo_tank/pyneevo/LICENSE`.
+MIT. The original PyNeeVo copyright and license are in [LICENSE](LICENSE), with a copy alongside the bundled library in `custom_components/neevo_tank/pyneevo/LICENSE`.

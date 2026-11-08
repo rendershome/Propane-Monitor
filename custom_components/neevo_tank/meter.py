@@ -5,8 +5,7 @@ count propane that was never burned. This tracks the lowest level since the last
 refill, and only counts a fall below it that is larger than normal noise.
 
 Work is done in percent, so a change to the tank's capacity cannot create a false
-jump in the total. Thresholds were chosen from one tank's history, where the
-largest daily rise without a refill was 0.3%.
+jump in the total.
 """
 
 from __future__ import annotations
