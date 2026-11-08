@@ -9,14 +9,14 @@ from urllib.parse import quote
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError
 
-from pyneevo.errors import (
+from .errors import (
     GenericHTTPError,
     InvalidCredentialsError,
     InvalidResponseFormat,
     NeeVoConnectionError,
     NeeVoTimeoutError,
 )
-from pyneevo.tank import LevelReading, Tank, parse_net_date
+from .tank import LevelReading, Tank, parse_net_date
 
 _LOGGER = logging.getLogger(__name__)
 

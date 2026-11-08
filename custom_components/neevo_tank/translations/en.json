@@ -1,0 +1,81 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect your Nee-Vo account",
+        "description": "Sign in with the email and password you use in the Nee-Vo app.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in to Nee-Vo again",
+        "description": "Nee-Vo rejected the saved password for {email}. Enter the current password.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to Nee-Vo. Check your password in the Nee-Vo app, because Nee-Vo can also report a wrong password this way.",
+      "invalid_auth": "Nee-Vo rejected that email or password.",
+      "no_tanks": "No tanks were found on this account.",
+      "unknown": "Something unexpected went wrong."
+    },
+    "abort": {
+      "already_configured": "This Nee-Vo account is already set up.",
+      "reauth_successful": "Signed in again successfully."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "reading_overdue": {
+        "name": "Reading overdue"
+      }
+    },
+    "sensor": {
+      "level": {
+        "name": "Tank level"
+      },
+      "remaining": {
+        "name": "Propane remaining"
+      },
+      "consumed": {
+        "name": "Propane consumed"
+      },
+      "consumption_rate": {
+        "name": "Consumption rate"
+      },
+      "days_remaining": {
+        "name": "Estimated days remaining"
+      },
+      "last_reading": {
+        "name": "Last reading"
+      },
+      "last_refill": {
+        "name": "Last refill"
+      },
+      "capacity": {
+        "name": "Tank capacity"
+      },
+      "pressure": {
+        "name": "Pressure"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "Nee-Vo rejected the saved email or password."
+    },
+    "cannot_connect": {
+      "message": "Could not reach Nee-Vo: {error}"
+    }
+  },
+  "issues": {
+    "cloud_unreachable": {
+      "title": "Nee-Vo updates have been failing",
+      "description": "Home Assistant has not been able to update your tank for over 24 hours. Nee-Vo may be down. It can also report a changed or rejected password this way, so check that your password works in the Nee-Vo app. If it has changed, delete and re-add this integration. This message clears after the next successful update."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "reading_overdue": { "default": "mdi:clock-alert-outline" }
+    },
+    "sensor": {
+      "level": { "default": "mdi:gauge" },
+      "remaining": { "default": "mdi:propane-tank-outline" },
+      "consumed": { "default": "mdi:propane-tank" },
+      "consumption_rate": { "default": "mdi:gas-burner" },
+      "days_remaining": { "default": "mdi:calendar-clock" },
+      "last_reading": { "default": "mdi:clock-outline" },
+      "last_refill": { "default": "mdi:truck-delivery-outline" },
+      "capacity": { "default": "mdi:propane-tank" },
+      "pressure": { "default": "mdi:gauge-low" }
+    }
+  }
+}

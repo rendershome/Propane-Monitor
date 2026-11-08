@@ -1,8 +1,63 @@
 # PyNeeVo
 
-An unofficial asynchronous Python library for interacting with the Nee-Vo tank monitoring platform API.
+An unofficial asynchronous Python library for interacting with the Nee-Vo tank monitoring platform API, and a Home Assistant integration built on it.
 
 PyNeeVo allows Python applications to authenticate with Nee-Vo and retrieve propane tank information and readings from connected devices.
+
+This project is not affiliated with or supported by Otodata. It uses an undocumented service that can change without notice. Your use of that service is subject to your Nee-Vo End User License Agreement, so check it applies to how you use this.
+
+## Home Assistant Integration
+
+The **Nee-Vo Tank Monitor** integration adds each tank on your account as a device. It only reads data, and it checks for updates every 6 hours.
+
+### Installing
+
+HACS can only install from public repositories. While this repository is private, install it manually:
+
+1. Copy `custom_components/neevo_tank` into your Home Assistant `config/custom_components` folder.
+2. Restart Home Assistant.
+3. Go to **Settings > Devices & Services > Add Integration** and search for **Nee-Vo Tank Monitor**.
+4. Enter the email and password you use in the Nee-Vo app. They are stored in Home Assistant's configuration, like other integrations' credentials.
+
+Requires Home Assistant 2026.10 or newer.
+
+### Entities
+
+| Entity | Unit | Notes |
+|---|---|---|
+| Tank level | % | From today's history when available, which has decimals |
+| Propane remaining | L | Level × capacity; Home Assistant can show it in gallons |
+| Propane consumed | L | Running total for the Energy dashboard; starts at 0 when installed |
+| Consumption rate | L/d | Average over the last 30 days; needs a week of history |
+| Estimated days remaining | days | Assumes recent usage continues, so treat it as a rough guide |
+| Last reading | | When the monitor last reported |
+| Last refill | | Latest refill found in the history |
+| Tank capacity | L | Diagnostic |
+| Pressure | | Diagnostic; only if the monitor reports it |
+| Reading overdue | | Diagnostic; on when the last reading is over 48 hours old |
+
+### Good to Know
+
+- **Consumption is an estimate.** It comes from level changes, ignoring falls under 0.5% until they add up and treating a rise of 5% or more as a refill. Those thresholds came from one tank, and a real refill has not been tested yet.
+- **Energy dashboard:** add **Propane consumed** as a gas source. Home Assistant measures it in liters of liquid propane, so a price per gallon needs dividing by 3.785.
+- **Outages:** sensors keep their last values for up to 24 hours. After that they become unavailable and a repair notice appears. Use **Last reading** or **Reading overdue** to spot a monitor that has stopped reporting.
+- **Not a safety device.** Don't rely on this to prevent running out of propane, or in place of normal inspections.
+- **Diagnostics** remove your email, password, serial number, tank name, location and supplier, but check them before sharing.
+
+### Removing
+
+Delete the integration under **Settings > Devices & Services**, then delete the `custom_components/neevo_tank` folder and restart. Deleting it also removes its saved consumption total.
+
+### Development
+
+The integration tests need Linux, because Home Assistant doesn't run natively on Windows:
+
+```bash
+pip install pytest-homeassistant-custom-component
+python -m pytest tests_ha tests
+```
+
+HACS only installs the integration folder, so `src/pyneevo` is copied to `custom_components/neevo_tank/pyneevo`. Copy it again after any library change. A test fails if the two differ.
 
 ## Features
 

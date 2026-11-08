@@ -1,0 +1,13 @@
+{
+  "domain": "neevo_tank",
+  "name": "Nee-Vo Tank Monitor",
+  "codeowners": ["@rendershome"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/rendershome/pyneevo",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/rendershome/pyneevo/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
