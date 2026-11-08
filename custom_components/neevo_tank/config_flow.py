@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import voluptuous as vol
 
+from . import backoff
 from .const import DOMAIN
 from .pyneevo import NeeVoApiInterface
 from .pyneevo.errors import InvalidCredentialsError, PyNeeVoError
@@ -85,6 +86,7 @@ class NeeVoConfigFlow(ConfigFlow, domain=DOMAIN):
             password = user_input[CONF_PASSWORD]
             error = await _async_validate(self.hass, email, password)
             if error is None:
+                backoff.clear(self.hass, entry.entry_id)
                 return self.async_update_reload_and_abort(
                     entry, data={**entry.data, CONF_PASSWORD: password}
                 )

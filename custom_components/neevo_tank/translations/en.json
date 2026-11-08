@@ -70,6 +70,9 @@
     },
     "cannot_connect": {
       "message": "Could not reach Nee-Vo: {error}"
+    },
+    "waiting_to_retry": {
+      "message": "Waiting before contacting Nee-Vo again after a failed attempt. Restart Home Assistant to try sooner."
     }
   },
   "issues": {

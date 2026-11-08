@@ -45,6 +45,7 @@ Then go to **Settings > Devices & Services > Add Integration**, search for **Nee
 - **Consumption is an estimate.** It comes from level changes, ignoring falls under 0.5% until they add up and treating a rise of 5% or more as a refill. Refill detection has not yet been confirmed against a real refill.
 - **Energy dashboard:** add **Propane consumed** as a gas source. It is measured in liters of liquid propane, so divide a price per gallon by 3.785.
 - **Outages:** sensors keep their last values for up to 24 hours. After that they become unavailable and a repair notice appears. Use **Last reading** or **Reading overdue** to spot a monitor that has stopped reporting.
+- **Failed startups:** if setup can't reach Nee-Vo, the integration waits before contacting it again, starting at 15 minutes and doubling up to 4 hours. Restart Home Assistant to try sooner.
 - **Not a safety device.** Don't rely on this to prevent running out of propane, or in place of normal inspections.
 - **Diagnostics** remove your email, password, serial number, tank name, location and supplier, but check them before sharing.
 

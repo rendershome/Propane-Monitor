@@ -11,6 +11,10 @@ UPDATE_INTERVAL = timedelta(hours=6)
 # poll would otherwise blank every sensor until the next poll.
 FAILURE_GRACE = timedelta(hours=24)
 
+# How long to wait before contacting Nee-Vo again after a failed setup.
+SETUP_RETRY_FIRST_WAIT = timedelta(minutes=15)
+SETUP_RETRY_LONGEST_WAIT = timedelta(hours=4)
+
 # When a monitor's last reading counts as overdue.
 READING_OVERDUE_AFTER = timedelta(hours=48)
 
