@@ -12,12 +12,16 @@ The **Nee-Vo Tank Monitor** integration adds each tank on your account as a devi
 
 ### Installing
 
-HACS can only install from public repositories. While this repository is private, install it manually:
+With [HACS](https://hacs.xyz):
 
-1. Copy `custom_components/neevo_tank` into your Home Assistant `config/custom_components` folder.
-2. Restart Home Assistant.
-3. Go to **Settings > Devices & Services > Add Integration** and search for **Nee-Vo Tank Monitor**.
-4. Enter the email and password you use in the Nee-Vo app. They are stored in Home Assistant's configuration, like other integrations' credentials.
+1. In HACS, open the menu and choose **Custom repositories**.
+2. Add `https://github.com/rendershome/pyneevo` with the type **Integration**.
+3. Find **Nee-Vo Tank Monitor** in HACS and download it.
+4. Restart Home Assistant.
+
+Or manually, copy `custom_components/neevo_tank` into your Home Assistant `config/custom_components` folder and restart.
+
+Then go to **Settings > Devices & Services > Add Integration**, search for **Nee-Vo Tank Monitor**, and enter the email and password you use in the Nee-Vo app. They are stored in Home Assistant's configuration, like other integrations' credentials.
 
 Requires Home Assistant 2026.10 or newer.
 
