@@ -4,10 +4,10 @@
   "codeowners": ["@rendershome"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/rendershome/pyneevo",
+  "documentation": "https://github.com/rendershome/Propane-Monitor",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/rendershome/pyneevo/issues",
+  "issue_tracker": "https://github.com/rendershome/Propane-Monitor/issues",
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

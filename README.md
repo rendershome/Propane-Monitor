@@ -1,8 +1,8 @@
-# PyNeeVo
+# Propane Monitor
 
-An unofficial asynchronous Python library for interacting with the Nee-Vo tank monitoring platform API, and a Home Assistant integration built on it.
+An unofficial Home Assistant integration for Nee-Vo propane tank monitors, and the asynchronous Python library behind it.
 
-PyNeeVo allows Python applications to authenticate with Nee-Vo and retrieve propane tank information and readings from connected devices.
+This project is built on [PyNeeVo](https://github.com/davidflypei/pyneevo) by [davidflypei](https://github.com/davidflypei), which is the original source of the library. See [Credits](#credits).
 
 This project is not affiliated with or supported by Otodata. It uses an undocumented service that can change without notice. Your use of that service is subject to your Nee-Vo End User License Agreement, so check it applies to how you use this.
 
@@ -15,7 +15,7 @@ The **Nee-Vo Tank Monitor** integration adds each tank on your account as a devi
 With [HACS](https://hacs.xyz):
 
 1. In HACS, open the menu and choose **Custom repositories**.
-2. Add `https://github.com/rendershome/pyneevo` with the type **Integration**.
+2. Add `https://github.com/rendershome/Propane-Monitor` with the type **Integration**.
 3. Find **Nee-Vo Tank Monitor** in HACS and download it.
 4. Restart Home Assistant.
 
@@ -271,6 +271,14 @@ pip install -e .
 python -m unittest discover -s tests -t .
 ```
 
+## Credits
+
+- **Original library:** [PyNeeVo](https://github.com/davidflypei/pyneevo), created by [davidflypei](https://github.com/davidflypei) and also published [on PyPI](https://pypi.org/project/pyneevo/). The library in this repository started as a copy of version 1.0.7 and has since been changed, so report problems with this version here rather than to that project.
+- **Library fix:** this history includes the error handling fix [jasonjhofmann](https://github.com/jasonjhofmann) contributed to PyNeeVo.
+- **Reference:** [propane-homeassistant](https://github.com/jasonjhofmann/propane-homeassistant), another Home Assistant integration for these monitors, was reviewed while designing this one.
+
+The original authors have not reviewed or endorsed this project.
+
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. The original PyNeeVo copyright and license are kept in [LICENSE](LICENSE), and a copy is included with the bundled library at `custom_components/neevo_tank/pyneevo/LICENSE`.

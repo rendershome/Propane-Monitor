@@ -24,6 +24,13 @@ def test_bundled_library_matches_source() -> None:
         ).read_text(encoding="utf-8").split(), f"{relative} is out of date"
 
 
+def test_bundled_library_keeps_original_license() -> None:
+    """The MIT license must travel with the copy that HACS installs."""
+    bundled = (INTEGRATION / "pyneevo" / "LICENSE").read_text(encoding="utf-8")
+    assert "Copyright (c) 2022 davidflypei" in bundled
+    assert bundled.split() == (ROOT / "LICENSE").read_text(encoding="utf-8").split()
+
+
 def test_manifest() -> None:
     manifest = load(INTEGRATION / "manifest.json")
     assert manifest["domain"] == INTEGRATION.name
