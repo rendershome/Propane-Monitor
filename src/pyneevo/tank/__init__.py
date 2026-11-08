@@ -121,3 +121,108 @@ class Tank:
     def last_reading(self) -> Optional[datetime]:
         """Return when the monitor last reported, in UTC, or ``None`` if unknown."""
         return parse_net_date(self._tank_data.get("LastReadingDate"))
+
+    @property
+    def latitude(self) -> Optional[float]:
+        """Return the tank's latitude. This is private: do not log or share it."""
+        return self._tank_data.get("Latitude")
+
+    @property
+    def longitude(self) -> Optional[float]:
+        """Return the tank's longitude. This is private: do not log or share it."""
+        return self._tank_data.get("Longitude")
+
+    @property
+    def company_id(self) -> Optional[str]:
+        """Return the ID of the propane company."""
+        return self._tank_data.get("CompanyId")
+
+    @property
+    def dealer_id(self) -> Optional[str]:
+        """Return the ID of the propane dealer."""
+        return self._tank_data.get("DealerId")
+
+    @property
+    def company_image_id(self) -> Optional[str]:
+        """Return the ID of the propane company's image."""
+        return self._tank_data.get("CompanyImageId")
+
+    @property
+    def company_name(self) -> Optional[str]:
+        """Return the name of the propane company."""
+        return self._tank_data.get("CompanyName")
+
+    @property
+    def company_support_phone_number(self) -> Optional[str]:
+        """Return the support phone number of the propane company."""
+        return self._tank_data.get("CompanySupportPhoneNumber")
+
+    @property
+    def fill_request_available(self) -> Optional[bool]:
+        """Return whether the company accepts fill requests through the app."""
+        return self._tank_data.get("CompanyFillRequestAvailable")
+
+    @property
+    def notify_at_1(self) -> Any:
+        """Return the first alert level."""
+        return self._tank_data.get("NotifyAt1")
+
+    @property
+    def notify_at_2(self) -> Any:
+        """Return the second alert level."""
+        return self._tank_data.get("NotifyAt2")
+
+    @property
+    def notify_critical_levels(self) -> Optional[bool]:
+        """Return the NotifyCriticalLevels setting."""
+        return self._tank_data.get("NotifyCriticalLevels")
+
+    @property
+    def notify_dispatch(self) -> Optional[bool]:
+        """Return the NotifyDispatch setting."""
+        return self._tank_data.get("NotifyDispatch")
+
+    @property
+    def notify_dispatch_enabled(self) -> Optional[bool]:
+        """Return the NotifyDispatchEnabled setting."""
+        return self._tank_data.get("NotifyDispatchEnabled")
+
+    @property
+    def notify_fill_detection(self) -> Optional[bool]:
+        """Return the NotifyFillDetection setting."""
+        return self._tank_data.get("NotifyFillDetection")
+
+    @property
+    def is_owner(self) -> Optional[bool]:
+        """Return whether the signed-in account owns this tank."""
+        return self._tank_data.get("IsOwner")
+
+    @property
+    def consumption_graph_enabled(self) -> Optional[bool]:
+        """Return the IsConsumptionVolumeGraphEnabled setting."""
+        return self._tank_data.get("IsConsumptionVolumeGraphEnabled")
+
+    @property
+    def sensor_min_level(self) -> Any:
+        """Return the SensorMinLevel value."""
+        return self._tank_data.get("SensorMinLevel")
+
+    @property
+    def sensor_max_level(self) -> Any:
+        """Return the SensorMaxLevel value."""
+        return self._tank_data.get("SensorMaxLevel")
+
+    @property
+    def tank_form_type(self) -> Any:
+        """Return the TankFormType code, whose meaning is undocumented."""
+        return self._tank_data.get("TankFormType")
+
+    @property
+    def tank_primary_value_type(self) -> Any:
+        """Return the TankPrimaryValueType code, whose meaning is undocumented."""
+        return self._tank_data.get("TankPrimaryValueType")
+
+    @property
+    def theme_info(self) -> Optional[dict]:
+        """Return the app color theme record."""
+        return self._tank_data.get("ThemeInfo")

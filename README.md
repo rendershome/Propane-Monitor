@@ -124,9 +124,34 @@ The API does not document `consumption`. In testing with one tank it matched the
 
 The Nee-Vo API chooses the date range. Dates with nothing recorded are left out, so there can be gaps between readings.
 
+### Other Read Operations
+
+These return the API's records as dictionaries.
+
+```python
+details = await api.get_tank_details(tank.id)
+dealer = await api.get_dealer_details(tank.dealer_id)
+campaigns = await api.get_company_campaigns(tank.company_id)
+image = await api.get_image(tank.theme_info["ImageId"])
+
+# These contain personal details. Do not log or share them.
+user = await api.get_user()
+authorizations = await api.get_tank_authorizations(tank.id)
+```
+
+`api.must_change_password` holds the value returned at login, or `None` if the API did not send one.
+
+PyNeeVo only reads. It has no methods for operations that change an account, a tank or a fill request, and it does not call them.
+
 ### Tank Properties
 
 `id`, `name`, `product`, `level`, `serial_number`, `tank_capacity`, `tank_last_pressure`, `tank_last_pressure_unit`, `last_reading` (a UTC `datetime`) and `data` (the raw record).
+
+Supplier: `company_id`, `dealer_id`, `company_image_id`, `company_name`, `company_support_phone_number`, `fill_request_available`.
+
+Alerts: `notify_at_1`, `notify_at_2`, `notify_critical_levels`, `notify_dispatch`, `notify_dispatch_enabled`, `notify_fill_detection`.
+
+Other: `is_owner`, `consumption_graph_enabled`, `sensor_min_level`, `sensor_max_level`, `tank_form_type`, `tank_primary_value_type`, `theme_info`, and `latitude` and `longitude`, which are private because they show where the tank is.
 
 Every property except `id` and `data` returns `None` if the API did not send that field.
 
@@ -162,7 +187,7 @@ except GenericHTTPError as err:
 
 ## Current API Coverage
 
-PyNeeVo currently implements support for the Nee-Vo `GetAllDisplayPropaneDevices` and `GetPropaneLevels` endpoints.
+PyNeeVo currently implements read operations only.
 
 Additional endpoints may be added in future releases.
 

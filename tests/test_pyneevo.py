@@ -385,8 +385,151 @@ class LevelHistoryTests(unittest.IsolatedAsyncioTestCase):
             await api.get_level_history("tank-1")
 
 
+class ReadOperationTests(unittest.IsolatedAsyncioTestCase):
+    """The added read operations request the right path and validate responses."""
+
+    RECORD_CALLS = (
+        ("get_tank_details", "GetPropaneDeviceDetails/x"),
+        ("get_dealer_details", "GetDealerDetails/x"),
+    )
+    LIST_CALLS = (
+        ("get_company_campaigns", "GetCompanyCampaigns/x"),
+        ("get_tank_authorizations", "GetPropaneDeviceAuthorizations/x"),
+    )
+
+    async def test_records(self):
+        for method, path in self.RECORD_CALLS:
+            with self.subTest(method=method):
+                api, session = client(FakeResponse(200, {"Name": "n"}))
+                self.assertEqual(await getattr(api, method)("x"), {"Name": "n"})
+                self.assertTrue(session.requests[0][0].endswith(f".svc/{path}"))
+
+    async def test_lists(self):
+        for method, path in self.LIST_CALLS:
+            with self.subTest(method=method):
+                api, session = client(FakeResponse(200, [{"Name": "n"}]))
+                self.assertEqual(await getattr(api, method)("x"), [{"Name": "n"}])
+                self.assertTrue(session.requests[0][0].endswith(f".svc/{path}"))
+
+    async def test_get_user(self):
+        api, session = client(FakeResponse(200, {"FirstName": "Test"}))
+        self.assertEqual(await api.get_user(), {"FirstName": "Test"})
+        self.assertTrue(session.requests[0][0].endswith(".svc/User"))
+
+    async def test_get_image(self):
+        api, session = client(FakeResponse(200, {"Image": "abc"}))
+        self.assertEqual(await api.get_image("x"), "abc")
+        self.assertTrue(session.requests[0][0].endswith(".svc/GetImage/x"))
+
+    async def test_get_image_without_image(self):
+        api, _ = client(FakeResponse(200, {}))
+        self.assertIsNone(await api.get_image("x"))
+
+    async def test_ids_are_escaped(self):
+        api, session = client(FakeResponse(200, {}))
+        await api.get_dealer_details("a/../DeleteUser")
+        self.assertTrue(
+            session.requests[0][0].endswith("/GetDealerDetails/a%2F..%2FDeleteUser")
+        )
+
+    async def test_wrong_shapes_are_invalid_format(self):
+        for method, _ in self.RECORD_CALLS:
+            for payload in ([], "oops", None):
+                with self.subTest(method=method, payload=payload):
+                    api, _session = client(FakeResponse(200, payload))
+                    with self.assertRaises(InvalidResponseFormat):
+                        await getattr(api, method)("x")
+        for method, _ in self.LIST_CALLS:
+            for payload in ({}, "oops", None, ["not-a-record"]):
+                with self.subTest(method=method, payload=payload):
+                    api, _session = client(FakeResponse(200, payload))
+                    with self.assertRaises(InvalidResponseFormat):
+                        await getattr(api, method)("x")
+
+    async def test_errors_match_the_other_calls(self):
+        api, _ = client(FakeResponse(401))
+        with self.assertRaises(InvalidCredentialsError):
+            await api.get_user()
+        api, _ = client(FakeResponse(502))
+        with self.assertRaises(GenericHTTPError):
+            await api.get_dealer_details("x")
+
+    async def test_login_reads_must_change_password(self):
+        session = FakeSession(FakeResponse(200, {"MustChangePassword": True}))
+        api = await NeeVoApiInterface.login(EMAIL, PASSWORD, session=session)
+        self.assertIs(api.must_change_password, True)
+
+    async def test_login_survives_an_unreadable_body(self):
+        bad_json = json.JSONDecodeError("bad", "", 0)
+        for payload in (bad_json, None, "ok", []):
+            with self.subTest(payload=payload):
+                session = FakeSession(FakeResponse(200, payload))
+                api = await NeeVoApiInterface.login(EMAIL, PASSWORD, session=session)
+                self.assertIsNone(api.must_change_password)
+
+    def test_no_change_operations_are_reachable(self):
+        """Only read operations are in the library's source."""
+        import inspect
+
+        import pyneevo.api
+
+        source = inspect.getsource(pyneevo.api)
+        for name in (
+            "DeletePropaneDevice",
+            "DeleteUser",
+            "RevokePropaneDeviceAuthorization",
+            "GenerateAccessAutorizationVoucher",
+            "GenerateTransfertAutorizationVoucher",
+            "UpdateCampaignClickCount",
+            "UpdatePropaneDevice",
+            "UpdateUser",
+            "ChangePassword",
+            "SendFillRequest",
+            "RegisterPropaneDevice",
+        ):
+            with self.subTest(name=name):
+                # Operation names appear in source as the start of a string.
+                self.assertNotIn(f'"{name}', source)
+
+
 class TankFieldTests(unittest.TestCase):
     """Tank properties tolerate the API's field variations."""
+
+    def test_every_documented_field_has_a_property(self):
+        fields = {
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "company_id": "CompanyId",
+            "dealer_id": "DealerId",
+            "company_image_id": "CompanyImageId",
+            "company_name": "CompanyName",
+            "company_support_phone_number": "CompanySupportPhoneNumber",
+            "fill_request_available": "CompanyFillRequestAvailable",
+            "notify_at_1": "NotifyAt1",
+            "notify_at_2": "NotifyAt2",
+            "notify_critical_levels": "NotifyCriticalLevels",
+            "notify_dispatch": "NotifyDispatch",
+            "notify_dispatch_enabled": "NotifyDispatchEnabled",
+            "notify_fill_detection": "NotifyFillDetection",
+            "is_owner": "IsOwner",
+            "consumption_graph_enabled": "IsConsumptionVolumeGraphEnabled",
+            "sensor_min_level": "SensorMinLevel",
+            "sensor_max_level": "SensorMaxLevel",
+            "tank_form_type": "TankFormType",
+            "tank_primary_value_type": "TankPrimaryValueType",
+            "theme_info": "ThemeInfo",
+        }
+        for attribute, field in fields.items():
+            with self.subTest(attribute=attribute):
+                marker = object()
+                self.assertIs(getattr(self.tank(**{field: marker}), attribute), marker)
+                self.assertIsNone(getattr(Tank({"Id": "tank-1"}, None), attribute))
+
+    def test_top_level_imports(self):
+        from pyneevo import LevelReading, parse_net_date
+
+        self.assertEqual(LevelReading._fields, ("date", "level", "consumption"))
+        self.assertIsNone(parse_net_date("nope"))
 
     def tank(self, **fields):
         return Tank(device(**fields), None)
